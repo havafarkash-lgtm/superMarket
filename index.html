@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>רשימת קניות משותפת</title>
+    <title>רשימת קניות LIVE 🔴</title>
     <style>
         :root { --primary: #4caf50; --accent: #2196f3; --danger: #f44336; --bg: #f8f9fa; --card: #ffffff; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 80px; color: #333; }
@@ -70,7 +70,7 @@
     <div id="view-shopping" class="container">
         <div style="display:flex; justify-content:space-between; align-items:center;">
             <h2>🛒 עגלה</h2>
-            <button onclick="fetchData()" style="font-size:0.9em; background:#eee; border:none; padding:5px 10px; border-radius:5px;">🔄 רענן נתונים</button>
+            <button onclick="fetchData()" style="font-size:0.9em; background:#eee; border:none; padding:5px 10px; border-radius:5px;">🔄 רענן כעת</button>
         </div>
         <div style="text-align: left; margin-bottom: 10px;">
             <button onclick="clearBought()" style="color: var(--danger); background: none; border: 1px solid var(--danger); padding: 5px 10px; border-radius: 4px;">נקה מסומנים</button>
@@ -85,8 +85,8 @@
 
     <script>
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // כאן אתה מדביק את הכתובת הארוכה שהעתקת מהשלב הקודם (בין המרכאות)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDJQJ5KcE5u6HOwyb2a1aSkTLR9hO29KUbBSc3dgk08v5QWUwjcRvNVAmVxxlUA0ebog/exec"; 
+        // הדבק כאן את הכתובת שלך מגוגל Apps Script
+        const SCRIPT_URL = "הדבק_כאן_את_הקישור_הארוך"; 
         // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
         let appData = {
@@ -94,29 +94,50 @@
             items: []
         };
 
+        // משתנה שמונע עדכון מסך אם המשתמש בדיוק מקליד משהו
+        let isUserTyping = false;
+        document.addEventListener('input', () => { isUserTyping = true; setTimeout(() => isUserTyping = false, 5000); });
+
         function showLoading(show) {
-            document.getElementById('loading').style.opacity = show ? 1 : 0;
-            document.getElementById('loading').innerText = show ? "מסנכרן..." : "";
+            // מציג את הבועה השחורה למעלה רק בפעולות יזומות, לא ברענון האוטומטי
+            const el = document.getElementById('loading');
+            el.style.opacity = show ? 1 : 0;
+            el.innerText = show ? "שומר..." : "";
         }
 
-        async function fetchData() {
-            showLoading(true);
+        async function fetchData(isBackground = false) {
+            // אם זה רענון ידני, תראה למשתמש שזה טוען. אם זה אוטומטי - תהיה שקט.
+            if (!isBackground) showLoading(true);
+            
             try {
                 const response = await fetch(SCRIPT_URL);
-                const data = await response.json();
-                if (data && data.categories) {
-                    appData = data;
-                    renderAll();
+                const newData = await response.json();
+                
+                if (newData && newData.categories) {
+                    // הבדיקה החכמה: האם באמת היה שינוי בנתונים?
+                    // אנחנו משווים את מה שהגיע (newData) למה שיש לנו כבר (appData)
+                    // אם הם זהים, לא עושים כלום כדי לא "להקפיץ" את המסך סתם.
+                    if (JSON.stringify(newData) !== JSON.stringify(appData)) {
+                        
+                        // עדכון רק אם המשתמש לא מקליד כרגע (כדי לא למחוק לו מה שכתב)
+                        if (!isUserTyping) {
+                            appData = newData;
+                            renderAll();
+                            console.log("נתונים חדשים התקבלו ועודכנו!");
+                        }
+                    }
                 }
             } catch (error) {
                 console.error("Error loading data:", error);
             }
-            showLoading(false);
+            
+            if (!isBackground) showLoading(false);
         }
 
         async function saveData() {
-            showLoading(true);
+            // עדכון אופטימי (מציג למשתמש מיד)
             renderAll(); 
+            showLoading(true);
             
             try {
                 await fetch(SCRIPT_URL, {
@@ -131,7 +152,17 @@
             showLoading(false);
         }
 
-        function init() { fetchData(); }
+        function init() { 
+            fetchData(); // טעינה ראשונה
+
+            // === הלב של העדכון האוטומטי ===
+            // כל 4000 מילישניות (4 שניות) האתר יבדוק אם יש חדש
+            setInterval(() => {
+                fetchData(true); // true = תעשה את זה בשקט ברקע
+            }, 4000);
+        }
+
+        // --- לוגיקה רגילה ---
 
         function addNewItem() {
             const nameInput = document.getElementById('new-item-name');
@@ -142,6 +173,7 @@
 
             appData.items.push({ id: Date.now(), name: name, cat: catSelect.value, count: 1, checked: false });
             nameInput.value = '';
+            isUserTyping = false; // שחרור נעילה
             saveData();
         }
 
@@ -186,12 +218,16 @@
             saveData();
         }
 
+        // --- תצוגה ---
+
         function renderAll() {
             renderPlanning(); renderShopping(); updateCategorySelect(); renderCategoryManager();
         }
 
         function renderPlanning() {
             const container = document.getElementById('planning-list');
+            const scrollPos = window.scrollY; // שמירת מיקום גלילה
+            
             container.innerHTML = '';
             appData.categories.forEach(cat => {
                 const itemsInCat = appData.items.filter(i => i.cat === cat);
@@ -250,6 +286,9 @@
 
         function updateCategorySelect() {
             const select = document.getElementById('new-item-category');
+            // שומרים את מה שהמשתמש בחר כרגע כדי לא לאפס לו בזמן הקלדה
+            const currentSelection = select.value; 
+            
             select.innerHTML = '';
             appData.categories.forEach(cat => {
                 const opt = document.createElement('option');
@@ -257,6 +296,8 @@
                 opt.innerText = cat;
                 select.appendChild(opt);
             });
+
+            if (currentSelection) select.value = currentSelection;
         }
 
         function renderCategoryManager() {
