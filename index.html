@@ -3,185 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>הסופר החכם שלי</title>
+    <title>רשימת קניות משותפת</title>
     <style>
-        :root {
-            --primary: #4caf50;
-            --accent: #2196f3;
-            --danger: #f44336;
-            --bg: #f8f9fa;
-            --card: #ffffff;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            margin: 0;
-            padding-bottom: 80px; /* מקום לתפריט התחתון */
-            color: #333;
-        }
-
-        /* --- תפריט ניווט תחתון --- */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 15px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 100;
-        }
-
-        .nav-btn {
-            border: none;
-            background: none;
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #777;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .nav-btn.active {
-            color: var(--primary);
-        }
-
-        /* --- אזור תוכן --- */
-        .container {
-            padding: 15px;
-            display: none; /* מוסתר כברירת מחדל, JS יציג את הרלוונטי */
-        }
-
-        .container.active {
-            display: block;
-        }
-
+        :root { --primary: #4caf50; --accent: #2196f3; --danger: #f44336; --bg: #f8f9fa; --card: #ffffff; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 80px; color: #333; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100; }
+        .nav-btn { border: none; background: none; font-size: 1.1em; font-weight: bold; color: #777; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+        .nav-btn.active { color: var(--primary); }
+        .container { padding: 15px; display: none; }
+        .container.active { display: block; }
         h2 { margin-top: 0; color: #333; }
-
-        /* --- עיצוב הרשימות --- */
-        .category-header {
-            background-color: #e9ecef;
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-top: 20px;
-            font-weight: bold;
-            color: #495057;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--card);
-            padding: 12px;
-            margin-bottom: 8px;
-            border-radius: 8px;
-            border-bottom: 1px solid #eee;
-        }
-
+        .category-header { background-color: #e9ecef; padding: 8px 12px; border-radius: 6px; margin-top: 20px; font-weight: bold; color: #495057; display: flex; justify-content: space-between; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; background: var(--card); padding: 12px; margin-bottom: 8px; border-radius: 8px; border-bottom: 1px solid #eee; }
         .item-name { font-size: 1.1em; flex-grow: 1; }
-
-        /* כפתורי פלוס מינוס */
         .controls { display: flex; align-items: center; gap: 10px; }
-        
-        .circle-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: none;
-            font-size: 1.2em;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
+        .circle-btn { width: 32px; height: 32px; border-radius: 50%; border: none; font-size: 1.2em; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .btn-minus { background: #ffebee; color: var(--danger); }
         .btn-plus { background: #e8f5e9; color: var(--primary); }
-        
-        .count-badge {
-            font-weight: bold;
-            min-width: 20px;
-            text-align: center;
-        }
-
-        /* --- מצב קנייה (Shopping Mode) --- */
-        .shopping-item {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .shopping-item.checked {
-            background-color: #f0f0f0;
-            color: #aaa;
-            text-decoration: line-through;
-            opacity: 0.6;
-        }
-
-        /* --- הוספת מוצרים --- */
-        .add-panel {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-        }
-        
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        input, select {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            flex-grow: 1;
-        }
-        
-        .btn-add {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        /* --- ניהול קטגוריות --- */
-        .cat-manager-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: white;
-            border-bottom: 1px solid #eee;
-            align-items: center;
-        }
+        .count-badge { font-weight: bold; min-width: 20px; text-align: center; }
+        .shopping-item { cursor: pointer; transition: all 0.3s ease; }
+        .shopping-item.checked { background-color: #f0f0f0; color: #aaa; text-decoration: line-through; opacity: 0.6; }
+        .add-panel { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        input, select { padding: 10px; border: 1px solid #ddd; border-radius: 6px; flex-grow: 1; }
+        .btn-add { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
+        .cat-manager-row { display: flex; justify-content: space-between; padding: 10px; background: white; border-bottom: 1px solid #eee; align-items: center; }
         .move-btn { background: none; border: none; font-size: 1.2em; }
-
-        .empty-state {
-            text-align: center;
-            color: #888;
-            margin-top: 50px;
+        .empty-state { text-align: center; color: #888; margin-top: 50px; }
+        
+        #loading {
+            position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 5px 15px; border-radius: 20px; font-size: 0.8em;
+            opacity: 0; transition: opacity 0.3s; z-index: 200; pointer-events: none;
         }
-
     </style>
 </head>
 <body>
 
+    <div id="loading">טוען...</div>
+
     <div id="view-planning" class="container active">
         <div class="add-panel">
-            <h3>הוספת מוצר חדש</h3>
+            <h3>הוספת מוצר</h3>
             <div class="input-group">
-                <input type="text" id="new-item-name" placeholder="שם המוצר (למשל: קורנפלקס)">
+                <input type="text" id="new-item-name" placeholder="שם המוצר">
             </div>
             <div class="input-group">
                 <select id="new-item-category"></select>
@@ -189,13 +54,12 @@
             <button class="btn-add" onclick="addNewItem()">הוסף לרשימה</button>
         </div>
 
-        <button onclick="toggleCategoryManager()" style="background:none; border:none; color: #777; text-decoration: underline; margin-bottom: 10px;">ניהול סדר קטגוריות</button>
+        <button onclick="toggleCategoryManager()" style="background:none; border:none; color: #777; text-decoration: underline; margin-bottom: 10px;">ניהול סדר מעברים</button>
         
         <div id="category-manager" style="display:none; margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 8px;">
-            <h4>סדר המעברים בסופר:</h4>
             <div id="cat-order-list"></div>
             <div class="input-group" style="margin-top:10px;">
-                <input type="text" id="new-cat-name" placeholder="שם קטגוריה חדשה">
+                <input type="text" id="new-cat-name" placeholder="קטגוריה חדשה">
                 <button class="btn-add" style="width:auto;" onclick="addNewCategory()">הוסף</button>
             </div>
         </div>
@@ -204,98 +68,105 @@
     </div>
 
     <div id="view-shopping" class="container">
-        <h2>🛒 עגלת קניות</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h2>🛒 עגלה</h2>
+            <button onclick="fetchData()" style="font-size:0.9em; background:#eee; border:none; padding:5px 10px; border-radius:5px;">🔄 רענן נתונים</button>
+        </div>
         <div style="text-align: left; margin-bottom: 10px;">
-            <button onclick="clearBought()" style="color: var(--danger); background: none; border: 1px solid var(--danger); padding: 5px 10px; border-radius: 4px;">נקה מה שסומן</button>
+            <button onclick="clearBought()" style="color: var(--danger); background: none; border: 1px solid var(--danger); padding: 5px 10px; border-radius: 4px;">נקה מסומנים</button>
         </div>
         <div id="shopping-list"></div>
     </div>
 
     <div class="bottom-nav">
-        <button class="nav-btn active" onclick="switchTab('planning')" id="nav-planning">
-            📝 תכנון
-        </button>
-        <button class="nav-btn" onclick="switchTab('shopping')" id="nav-shopping">
-            🛒 בסופר
-        </button>
+        <button class="nav-btn active" onclick="switchTab('planning')" id="nav-planning">📝 תכנון</button>
+        <button class="nav-btn" onclick="switchTab('shopping')" id="nav-shopping">🛒 בסופר</button>
     </div>
 
     <script>
-        // --- מבנה נתונים התחלתי (ברירת מחדל אם אין שמירה) ---
-        const defaultData = {
-            categories: ["ירקות ופירות", "מאפים", "מוצרי חלב", "יבשים ושימורים", "ניקיון"],
-            items: [
-                { id: 1, name: "מלפפון", cat: "ירקות ופירות", count: 0, checked: false },
-                { id: 2, name: "עגבניה", cat: "ירקות ופירות", count: 0, checked: false },
-                { id: 3, name: "חלב", cat: "מוצרי חלב", count: 0, checked: false },
-                { id: 4, name: "לחם", cat: "מאפים", count: 0, checked: false }
-            ]
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // כאן אתה מדביק את הכתובת הארוכה שהעתקת מהשלב הקודם (בין המרכאות)
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDJQJ5KcE5u6HOwyb2a1aSkTLR9hO29KUbBSc3dgk08v5QWUwjcRvNVAmVxxlUA0ebog/exec"; 
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        let appData = {
+            categories: ["ירקות ופירות", "מאפים", "מוצרי חלב", "יבשים", "ניקיון"],
+            items: []
         };
 
-        let appData = JSON.parse(localStorage.getItem('superAppData')) || defaultData;
-
-        // --- אתחול ---
-        function init() {
-            renderPlanning();
-            renderShopping();
-            updateCategorySelect();
-            renderCategoryManager();
+        function showLoading(show) {
+            document.getElementById('loading').style.opacity = show ? 1 : 0;
+            document.getElementById('loading').innerText = show ? "מסנכרן..." : "";
         }
 
-        // --- שמירה ---
-        function saveData() {
-            localStorage.setItem('superAppData', JSON.stringify(appData));
-            // מרעננים את התצוגות
-            renderPlanning(); 
-            renderShopping(); 
+        async function fetchData() {
+            showLoading(true);
+            try {
+                const response = await fetch(SCRIPT_URL);
+                const data = await response.json();
+                if (data && data.categories) {
+                    appData = data;
+                    renderAll();
+                }
+            } catch (error) {
+                console.error("Error loading data:", error);
+            }
+            showLoading(false);
         }
 
-        // --- פונקציות ליבה ---
+        async function saveData() {
+            showLoading(true);
+            renderAll(); 
+            
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appData)
+                });
+            } catch (error) {
+                console.error("Error saving data:", error);
+            }
+            showLoading(false);
+        }
 
-        // 1. הוספת מוצר חדש
+        function init() { fetchData(); }
+
         function addNewItem() {
             const nameInput = document.getElementById('new-item-name');
             const catSelect = document.getElementById('new-item-category');
-            
             const name = nameInput.value.trim();
-            const cat = catSelect.value;
 
-            if (!name) return alert("נא לכתוב שם מוצר");
+            if (!name) return;
 
-            appData.items.push({
-                id: Date.now(),
-                name: name,
-                cat: cat,
-                count: 1, // כשמוסיפים מוצר חדש, בטח רוצים לקנות אותו
-                checked: false
-            });
-
+            appData.items.push({ id: Date.now(), name: name, cat: catSelect.value, count: 1, checked: false });
             nameInput.value = '';
             saveData();
-            alert("המוצר נוסף בהצלחה!");
         }
 
-        // 2. עדכון כמות (פלוס/מינוס)
         function updateCount(id, change) {
             const item = appData.items.find(i => i.id === id);
             if (item) {
                 item.count += change;
                 if (item.count < 0) item.count = 0;
-                if (item.count > 0) item.checked = false; // אם העליתי כמות, זה חוזר להיות לא מסומן
+                if (item.count > 0) item.checked = false;
                 saveData();
             }
         }
 
-        // 3. סימון מוצר כ"נלקח" (במסך קניות)
         function toggleCheck(id) {
             const item = appData.items.find(i => i.id === id);
-            if (item) {
-                item.checked = !item.checked;
+            if (item) { item.checked = !item.checked; saveData(); }
+        }
+
+        function clearBought() {
+            if(confirm("למחוק מסומנים?")) {
+                appData.items.forEach(item => { if (item.checked) { item.count = 0; item.checked = false; } });
                 saveData();
             }
         }
-
-        // 4. ניהול קטגוריות
+        
         function addNewCategory() {
             const input = document.getElementById('new-cat-name');
             const name = input.value.trim();
@@ -303,8 +174,6 @@
                 appData.categories.push(name);
                 input.value = '';
                 saveData();
-                updateCategorySelect();
-                renderCategoryManager();
             }
         }
 
@@ -315,30 +184,26 @@
                 [appData.categories[index], appData.categories[index+1]] = [appData.categories[index+1], appData.categories[index]];
             }
             saveData();
-            renderCategoryManager();
         }
 
-        // --- רינדור (תצוגה) ---
+        function renderAll() {
+            renderPlanning(); renderShopping(); updateCategorySelect(); renderCategoryManager();
+        }
 
         function renderPlanning() {
             const container = document.getElementById('planning-list');
             container.innerHTML = '';
-
             appData.categories.forEach(cat => {
-                // מסננים מוצרים ששייכים לקטגוריה הזו
                 const itemsInCat = appData.items.filter(i => i.cat === cat);
-                
-                // מציגים קטגוריה רק אם יש בה מוצרים (או אופציונלי: תמיד)
                 if(itemsInCat.length > 0) {
                     const header = document.createElement('div');
                     header.className = 'category-header';
                     header.innerText = cat;
                     container.appendChild(header);
-
                     itemsInCat.forEach(item => {
                         const div = document.createElement('div');
                         div.className = 'item-row';
-                        div.style.background = item.count > 0 ? '#e8f5e9' : 'white'; // ירוק בהיר אם נבחר
+                        div.style.background = item.count > 0 ? '#e8f5e9' : 'white';
                         div.innerHTML = `
                             <span class="item-name">${item.name}</span>
                             <div class="controls">
@@ -356,37 +221,26 @@
         function renderShopping() {
             const container = document.getElementById('shopping-list');
             container.innerHTML = '';
-
-            // מסננים רק מה שצריך לקנות (כמות גדולה מ-0)
             const toBuy = appData.items.filter(i => i.count > 0);
-
             if (toBuy.length === 0) {
-                container.innerHTML = '<div class="empty-state">הרשימה ריקה.<br>עבור ל"תכנון" כדי להוסיף מוצרים.</div>';
+                container.innerHTML = '<div class="empty-state">עגלה ריקה</div>';
                 return;
             }
-
-            // מיון: קודם מה שלא נבדק, אחר כך מה שנבדק. ובתוך זה לפי סדר הקטגוריות
             appData.categories.forEach(cat => {
                 const itemsInCat = toBuy.filter(i => i.cat === cat);
-                
-                // אנחנו רוצים להציג את הקטגוריה רק אם יש בה מוצרים שלא סומנו, או אם יש מוצרים בכלל
-                // נציג תמיד את כל הנבחרים
                 if (itemsInCat.length > 0) {
                     const header = document.createElement('div');
                     header.className = 'category-header';
                     header.innerText = cat;
                     container.appendChild(header);
-
-                    // מיון פנימי: לא מסומנים למעלה
                     itemsInCat.sort((a,b) => a.checked - b.checked);
-
                     itemsInCat.forEach(item => {
                         const div = document.createElement('div');
                         div.className = `item-row shopping-item ${item.checked ? 'checked' : ''}`;
-                        div.onclick = () => toggleCheck(item.id); // לחיצה על כל השורה
+                        div.onclick = () => toggleCheck(item.id);
                         div.innerHTML = `
                             <span class="item-name">${item.name}</span>
-                            <div style="font-weight:bold; color:var(--primary);">${item.count} יח'</div>
+                            <div style="font-weight:bold; color:var(--primary);">${item.count}</div>
                         `;
                         container.appendChild(div);
                     });
@@ -423,17 +277,11 @@
         }
 
         function switchTab(tabName) {
-            // הסתרת הכל
             document.querySelectorAll('.container').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-
-            // הצגת הנבחר
             document.getElementById(`view-${tabName}`).classList.add('active');
             document.getElementById(`nav-${tabName}`).classList.add('active');
-
-            // רינדור מחדש למקרה שהיו שינויים
-            if(tabName === 'shopping') renderShopping();
-            if(tabName === 'planning') renderPlanning();
+            if(tabName === 'shopping') fetchData(); 
         }
 
         function toggleCategoryManager() {
@@ -441,21 +289,7 @@
             el.style.display = el.style.display === 'none' ? 'block' : 'none';
         }
 
-        function clearBought() {
-            if(confirm("למחוק את כל המוצרים שסומנו כנלקחו?")) {
-                appData.items.forEach(item => {
-                    if (item.checked) {
-                        item.count = 0;
-                        item.checked = false;
-                    }
-                });
-                saveData();
-            }
-        }
-
-        // הפעלה
         init();
-
     </script>
 </body>
 </html>
