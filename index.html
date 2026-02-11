@@ -179,20 +179,21 @@
         }
 
         async function saveData() {
-            renderAll(); 
-            showLoading(true);
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(appData)
-                });
-            } catch (error) {
-                console.error("Error saving data:", error);
-            }
-            showLoading(false);
-        }
+    // רינדור מיידי – חוויה חלקה
+    renderAll();
+
+    // שמירה לשרת ברקע
+    showLoading(true);
+    fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(appData)
+    }).finally(() => {
+        showLoading(false);
+    });
+}
+
 
         function init() { 
             fetchData();
@@ -444,5 +445,6 @@
     </script>
 </body>
 </html>
+
 
 
