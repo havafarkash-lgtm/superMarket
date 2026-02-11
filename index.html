@@ -160,20 +160,23 @@
             el.innerText = show ? "שומר..." : "";
         }
 
-        async function fetchData(isBackground = false) {
-            if (!isBackground) showLoading(true);
-            try {
-                const response = await fetch(SCRIPT_URL);
-                const newData = await response.json();
-                
-                if (newData && newData.categories) {
-                    if (JSON.stringify(newData) !== JSON.stringify(appData)) {
-                        if (!isUserTyping && document.getElementById('options-modal').style.display !== 'flex') {
-                            appData = newData;
-                            renderAll();
-                        }
-                    }
-                }
+      if (newData && newData.categories) {
+
+    // ❌ אם יש שמירה ממתינה – לא לדרוס נתונים מקומיים
+    if (saveTimeout) return;
+
+    // ❌ אם המשתמש באמצע פעולה
+    if (isUserTyping) return;
+
+    // ❌ אם מודל פתוח
+    if (document.getElementById('options-modal').style.display === 'flex') return;
+
+    if (JSON.stringify(newData) !== JSON.stringify(appData)) {
+        appData = newData;
+        renderAll();
+    }
+}
+
             } catch (error) {
                 console.error("Error loading data:", error);
             }
@@ -459,6 +462,7 @@
     </script>
 </body>
 </html>
+
 
 
 
