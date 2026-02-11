@@ -144,6 +144,8 @@
         // משתנים לניהול עריכה/מחיקה (תומך גם במוצרים וגם בקטגוריות)
         let editTarget = null; // יחזיק אובייקט: { type: 'item'/'cat', id: ..., index: ... }
         let isUserTyping = false;
+        let saveTimeout = null;
+
         
         document.addEventListener('input', (e) => { 
             if(e.target.tagName === 'INPUT') {
@@ -179,20 +181,28 @@
         }
 
         async function saveData() {
-    // רינדור מיידי – חוויה חלקה
+    // רינדור מיידי
     renderAll();
 
-    // שמירה לשרת ברקע
-    showLoading(true);
-    fetch(SCRIPT_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(appData)
-    }).finally(() => {
-        showLoading(false);
-    });
+    // ביטול שמירה קודמת אם קיימת
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
+    }
+
+    // שמירה לשרת רק אחרי שהמשתמש הפסיק ללחוץ
+    saveTimeout = setTimeout(() => {
+        showLoading(true);
+        fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(appData)
+        }).finally(() => {
+            showLoading(false);
+        });
+    }, 500);
 }
+
 
 
         function init() { 
@@ -449,6 +459,7 @@
     </script>
 </body>
 </html>
+
 
 
 
