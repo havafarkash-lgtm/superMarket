@@ -285,15 +285,19 @@
             saveData();
         }
 
-        function updateCount(id, change) {
-            const item = appData.items.find(i => i.id === id);
-            if (item) {
-                item.count += change;
-                if (item.count < 0) item.count = 0;
-                if (item.count > 0) item.checked = false;
-                saveData();
-            }
-        }
+     function updateCount(id, change) {
+    isUserTyping = true;
+    setTimeout(() => isUserTyping = false, 1000);
+
+    const item = appData.items.find(i => i.id === id);
+    if (item) {
+        item.count += change;
+        if (item.count < 0) item.count = 0;
+        if (item.count > 0) item.checked = false;
+        saveData();
+    }
+}
+
 
         function toggleCheck(id) {
             const item = appData.items.find(i => i.id === id);
@@ -445,6 +449,7 @@
     </script>
 </body>
 </html>
+
 
 
 
