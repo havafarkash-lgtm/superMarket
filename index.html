@@ -74,7 +74,6 @@
         .btn-delete { background-color: var(--danger); color: white; }
         .btn-cancel { background-color: #eee; color: #333; }
 
-        /* מודל כמות */
         #count-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
         #count-modal .modal-content { max-width: 260px; }
         #count-modal h3 { color: var(--primary); margin-top: 0; margin-bottom: 15px; }
@@ -179,6 +178,7 @@
         const BIN_ID  = "69a932cd43b1c97be9b56785";
         const API_KEY = "$2a$10$5q5TOdgWhqXwKNtLVW3zouWkzxAXBQBInNcnuAADUVYL5QZkL0rO.";
         const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+        const PROXY   = "https://api.allorigins.win/raw?url=";
 
         let appData = {
             categories: ["ירקות ופירות", "מאפים", "מוצרי חלב", "יבשים", "ניקיון"],
@@ -211,7 +211,7 @@
             isSaving = true;
             showLoading(true);
             try {
-                await fetch(BIN_URL, {
+                await fetch(PROXY + encodeURIComponent(BIN_URL), {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Versioning': 'false' },
                     body: JSON.stringify(appData)
@@ -225,7 +225,9 @@
         async function fetchData(isBackground = false) {
             if (!isBackground) showLoading(true, "טוען...");
             try {
-                const response = await fetch(`${BIN_URL}/latest`, { headers: { 'X-Master-Key': API_KEY } });
+                const response = await fetch(PROXY + encodeURIComponent(BIN_URL + "/latest"), {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
                 const json = await response.json();
                 const newData = json.record;
                 if (newData && newData.categories) {
@@ -303,7 +305,6 @@
             const catItems = appData.items.filter(i => i.cat === item.cat);
             const globalIdx = appData.items.indexOf(item);
             const catIdx = catItems.indexOf(item);
-
             if (direction === -1 && catIdx > 0) {
                 const swapIdx = appData.items.indexOf(catItems[catIdx - 1]);
                 [appData.items[globalIdx], appData.items[swapIdx]] = [appData.items[swapIdx], appData.items[globalIdx]];
@@ -433,17 +434,14 @@
                     header.className = 'category-header';
                     header.innerText = cat;
                     container.appendChild(header);
-
                     itemsInCat.forEach((item, catIdx) => {
                         const isFirst = catIdx === 0;
                         const isLast = catIdx === itemsInCat.length - 1;
                         const div = document.createElement('div');
                         div.className = 'item-row';
                         div.style.background = item.count > 0 ? '#e8f5e9' : 'white';
-
                         const countClass = item.count > 0 ? 'count-badge has-count' : 'count-badge';
                         const countLabel = item.count > 0 ? item.count : '·';
-
                         div.innerHTML = `
                             <div class="move-col">
                                 <button onclick="moveItem(${item.id}, -1)" style="${isFirst ? 'opacity:0.2;pointer-events:none' : ''}">⬆</button>
