@@ -175,10 +175,7 @@
     </div>
 
     <script>
-        const BIN_ID  = "69a932cd43b1c97be9b56785";
-        const API_KEY = "$2a$10$5q5TOdgWhqXwKNtLVW3zouWkzxAXBQBInNcnuAADUVYL5QZkL0rO.";
-        const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-        const PROXY   = "https://corsproxy.io/?url=";
+        const WORKER_URL = "https://rough-cell-2ac5.ron100cohen100.workers.dev";
 
         let appData = {
             categories: ["ירקות ופירות", "מאפים", "מוצרי חלב", "יבשים", "ניקיון"],
@@ -211,9 +208,9 @@
             isSaving = true;
             showLoading(true);
             try {
-                await fetch(PROXY + encodeURIComponent(BIN_URL), {
+                await fetch(WORKER_URL, {
                     method: 'PUT',
-                    headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY, 'X-Bin-Versioning': 'false' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(appData)
                 });
             } catch (e) { console.error(e); }
@@ -225,11 +222,8 @@
         async function fetchData(isBackground = false) {
             if (!isBackground) showLoading(true, "טוען...");
             try {
-                const response = await fetch(PROXY + encodeURIComponent(BIN_URL + "/latest"), {
-                    headers: { 'X-Master-Key': API_KEY }
-                });
-                const json = await response.json();
-                const newData = json.record;
+                const response = await fetch(WORKER_URL);
+                const newData = await response.json();
                 if (newData && newData.categories) {
                     if (JSON.stringify(newData) !== JSON.stringify(appData)) {
                         const optModal = document.getElementById('options-modal').style.display === 'flex';
